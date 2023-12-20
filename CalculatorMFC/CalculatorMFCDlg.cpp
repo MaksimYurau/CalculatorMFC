@@ -73,6 +73,7 @@ BEGIN_MESSAGE_MAP(CCalculatorMFCDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON_CALCULATE, &CCalculatorMFCDlg::OnBnClickedButtonCalculate)
 	ON_BN_CLICKED(IDC_BUTTON_CLEAR, &CCalculatorMFCDlg::OnBnClickedButtonClear)
+	ON_LBN_SELCHANGE(IDC_LIST_HISTORY, &CCalculatorMFCDlg::OnLbnSelchangeListHistory)
 END_MESSAGE_MAP()
 
 
@@ -81,6 +82,9 @@ END_MESSAGE_MAP()
 BOOL CCalculatorMFCDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+
+	// Инициализация ListBox
+	m_listHistory.SubclassDlgItem(IDC_LIST_HISTORY, this);
 
 	// Добавление пункта "О программе..." в системное меню.
 
@@ -161,38 +165,81 @@ HCURSOR CCalculatorMFCDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
+void CCalculatorMFCDlg::AddToHistory(const CString& operation)
+{
+	m_listHistory.AddString(operation);
+}
 
 void CCalculatorMFCDlg::OnBnClickedButtonCalculate()
 {
-	// TODO: добавьте свой код обработчика уведомлений
+	// Получение операндов и оператора для выполнения операции
+	CString operand1, operand2, operation;
+	GetDlgItemText(IDC_EDIT1, operand1);
+	GetDlgItemText(IDC_EDIT2, operand2);
 
-	UpdateData(TRUE);
+	// Получение выбранного переключателя
+	UINT checkedRadioButton = GetCheckedRadioButton(IDC_RADIO_PLUS, IDC_RADIO_DIVIDE);
 
-	if (IsDlgButtonChecked(IDC_RADIO_PLUS))
+	// Определение оператора на основе выбранного переключателя
+	switch (checkedRadioButton)
 	{
-		result = number1 + number2;
+	case IDC_RADIO_PLUS:
+		operation = "+";
+		break;
+	case IDC_RADIO_MINUS:
+		operation = "-";
+		break;
+	case IDC_RADIO_MULTIPLY:
+		operation = "*";
+		break;
+	case IDC_RADIO_DIVIDE:
+		operation = "/";
+		break;
+	default:
+		// Обработка ошибки, если ни один переключатель не выбран
+		MessageBox(_T("Ошибка: Оператор не выбран!"), _T("Ошибка"), MB_OK | MB_ICONERROR);
+		return;
 	}
 
-	if (IsDlgButtonChecked(IDC_RADIO_MINUS))
+	// Выполнение операции и получение результата
+	double result = 0.0;
+	if (operation == "+")
 	{
-		result = number1 - number2;
+		result = _ttof(operand1) + _ttof(operand2);
+	}
+	else if (operation == "-")
+	{
+		result = _ttof(operand1) - _ttof(operand2);
+	}
+	else if (operation == "*")
+	{
+		result = _ttof(operand1) * _ttof(operand2);
+	}
+	else if (operation == "/")
+	{
+		if (_ttof(operand2) != 0.0)
+		{
+			result = _ttof(operand1) / _ttof(operand2);
+		}
+		else
+		{
+			// Обработка деления на ноль
+			MessageBox(_T("Ошибка: Деление на нуль!"), _T("Ошибка"), MB_OK | MB_ICONERROR);
+			return;
+		}
 	}
 
-	if (IsDlgButtonChecked(IDC_RADIO_MULTIPLY))
-	{
-		result = number1 * number2;
-	}
+	// Формирование строки операции для добавления в ListBox
+	CString operationString;
+	operationString.Format(_T("%s %s %s = %.2f"), operand1, operation, operand2, result);
 
-	if (IsDlgButtonChecked(IDC_RADIO_DIVIDE))
-	{
-		if(number2 != 0)
-			result = number1 / number2;
-		else 
-			MessageBox(_T("Деление на нуль!"), _T("Ошибка"), MB_OK | MB_ICONERROR);
-	}
+	// Добавление операции в ListBox
+	AddToHistory(operationString);
 
-	UpdateData(FALSE);
+	// Отображение результата на диалоговом окне
+	CString resultString;
+	resultString.Format(_T("%.2f"), result);
+	SetDlgItemText(IDC_EDIT3, resultString);
 }
 
 
@@ -211,4 +258,27 @@ void CCalculatorMFCDlg::OnBnClickedButtonClear()
 	}
 
 	UpdateData(FALSE);
+}
+
+
+void CCalculatorMFCDlg::OnLbnSelchangeListHistory()
+{
+	// TODO: добавьте свой код обработчика уведомлений
+
+   // Получение указателя на элемент ListBox
+	CListBox* pListBox = static_cast<CListBox*>(GetDlgItem(IDC_LIST_HISTORY));
+	if (pListBox)
+	{
+		// Получение индекса выбранного элемента
+		int selectedIndex = pListBox->GetCurSel();
+		if (selectedIndex != LB_ERR)
+		{
+			// Получение текста выбранного элемента
+			CString selectedText;
+			pListBox->GetText(selectedIndex, selectedText);
+
+			// Вставка текста в IDC_EDIT3
+			SetDlgItemText(IDC_EDIT3, selectedText);
+		}
+	}
 }

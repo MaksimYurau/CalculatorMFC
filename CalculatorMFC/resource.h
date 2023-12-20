@@ -12,10 +12,12 @@
 #define IDC_EDIT3                       1002
 #define IDC_RADIO_PLUS                  1003
 #define IDC_RADIO_MINUS                 1004
+#define IDC_RADIO_MULTIPLICATION        1005
 #define IDC_RADIO_MULTIPLY              1005
 #define IDC_RADIO_DIVIDE                1006
 #define IDC_BUTTON_CLEAR                1007
 #define IDC_BUTTON_CALCULATE            1008
+#define IDC_LIST_HISTORY                1009
 
 // Next default values for new objects
 // 
@@ -23,7 +25,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1009
+#define _APS_NEXT_CONTROL_VALUE         1010
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

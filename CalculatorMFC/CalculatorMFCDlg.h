@@ -25,6 +25,10 @@ public:
 protected:
 	HICON m_hIcon;
 
+	CListBox m_listHistory;
+
+	void AddToHistory(const CString& operation); // Объявление метода AddToHistory()
+
 	// Созданные функции схемы сообщений
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
@@ -37,4 +41,5 @@ public:
 	double result;
 	afx_msg void OnBnClickedButtonCalculate();
 	afx_msg void OnBnClickedButtonClear();
+	afx_msg void OnLbnSelchangeListHistory();
 };
