@@ -257,6 +257,18 @@ void CCalculatorMFCDlg::OnBnClickedButtonClear()
 		result = NULL;
 	}
 
+	CButton* pButtonPlus = static_cast<CButton*>(GetDlgItem(IDC_RADIO_PLUS));
+	CButton* pButtonMinus = static_cast<CButton*>(GetDlgItem(IDC_RADIO_MINUS));
+	CButton* pButtonMultiply = static_cast<CButton*>(GetDlgItem(IDC_RADIO_MULTIPLY));
+	CButton* pButtonDivide = static_cast<CButton*>(GetDlgItem(IDC_RADIO_DIVIDE));
+
+	pButtonPlus->SetCheck(BST_UNCHECKED);
+	pButtonMinus->SetCheck(BST_UNCHECKED);
+	pButtonMultiply->SetCheck(BST_UNCHECKED);
+	pButtonDivide->SetCheck(BST_UNCHECKED);
+
+	m_listHistory.ResetContent(); // Очистка содержимого ListBox
+
 	UpdateData(FALSE);
 }
 
@@ -264,21 +276,84 @@ void CCalculatorMFCDlg::OnBnClickedButtonClear()
 void CCalculatorMFCDlg::OnLbnSelchangeListHistory()
 {
 	// TODO: добавьте свой код обработчика уведомлений
-
-   // Получение указателя на элемент ListBox
+	
 	CListBox* pListBox = static_cast<CListBox*>(GetDlgItem(IDC_LIST_HISTORY));
 	if (pListBox)
 	{
-		// Получение индекса выбранного элемента
 		int selectedIndex = pListBox->GetCurSel();
 		if (selectedIndex != LB_ERR)
 		{
-			// Получение текста выбранного элемента
 			CString selectedText;
 			pListBox->GetText(selectedIndex, selectedText);
 
-			// Вставка текста в IDC_EDIT3
-			SetDlgItemText(IDC_EDIT3, selectedText);
+			// Разделение строки на операнды и результат
+			CString operand1, operand2, result, operation;
+			int equalIndex = selectedText.Find(L" ");
+			if (equalIndex != -1)
+			{
+				// Извлечение первого операнда
+				operand1 = selectedText.Left(equalIndex);
+				operand1.Trim();
+
+				CString expression = selectedText.Mid(equalIndex + 1);
+				expression.Trim();
+
+				// Извлечение операции и второго операнда
+				int spaceIndex = expression.Find(L" ");
+				if (spaceIndex != -1)
+				{
+					operation = expression.Left(spaceIndex);
+					operation.Trim();
+					expression = expression.Mid(spaceIndex + 1);
+
+					operand2 = expression.Left(expression.Find(L" "));
+					operand2.Trim();
+
+					// Извлечение результата
+					result = expression.Mid(expression.Find(L"=") + 1);
+					result.Trim();
+				}
+			}
+
+			// Вставка значений в соответствующие поля
+			SetDlgItemText(IDC_EDIT1, operand1);
+			SetDlgItemText(IDC_EDIT2, operand2);
+			SetDlgItemText(IDC_EDIT3, result);
+
+			// Выбор соответствующей радио-кнопки и снятие выбора с остальных
+			CButton* pButtonPlus = static_cast<CButton*>(GetDlgItem(IDC_RADIO_PLUS));
+			CButton* pButtonMinus = static_cast<CButton*>(GetDlgItem(IDC_RADIO_MINUS));
+			CButton* pButtonMultiply = static_cast<CButton*>(GetDlgItem(IDC_RADIO_MULTIPLY));
+			CButton* pButtonDivide = static_cast<CButton*>(GetDlgItem(IDC_RADIO_DIVIDE));
+
+			if (operation == L"+")
+			{
+				pButtonPlus->SetCheck(BST_CHECKED);
+				pButtonMinus->SetCheck(BST_UNCHECKED);
+				pButtonMultiply->SetCheck(BST_UNCHECKED);
+				pButtonDivide->SetCheck(BST_UNCHECKED);
+			}
+			else if (operation == L"-")
+			{
+				pButtonPlus->SetCheck(BST_UNCHECKED);
+				pButtonMinus->SetCheck(BST_CHECKED);
+				pButtonMultiply->SetCheck(BST_UNCHECKED);
+				pButtonDivide->SetCheck(BST_UNCHECKED);
+			}
+			else if (operation == L"*")
+			{
+				pButtonPlus->SetCheck(BST_UNCHECKED);
+				pButtonMinus->SetCheck(BST_UNCHECKED);
+				pButtonMultiply->SetCheck(BST_CHECKED);
+				pButtonDivide->SetCheck(BST_UNCHECKED);
+			}
+			else if (operation == L"/")
+			{
+				pButtonPlus->SetCheck(BST_UNCHECKED);
+				pButtonMinus->SetCheck(BST_UNCHECKED);
+				pButtonMultiply->SetCheck(BST_UNCHECKED);
+				pButtonDivide->SetCheck(BST_CHECKED);
+			}
 		}
 	}
 }
